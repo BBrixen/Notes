@@ -1,0 +1,203 @@
+package Note_App;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class TextFile {
+
+    public static void addText(String data, String fileName) {
+        if (!fileName.startsWith(Main.txtFilename)) {
+            fileName = Main.txtFilename + fileName;
+        }
+
+        try {
+            Scanner scan = new Scanner(new File(fileName));
+
+            ArrayList<String> words = readFromFile(fileName);
+            //stores old data to be used again
+            words.add(data);
+
+            writeToFile(words, fileName);
+        } catch (FileNotFoundException e) {
+            System.out.println("No file found. Creating One");
+            ArrayList<String> start = new ArrayList<>();
+            start.add(data);
+            writeToFile(start, fileName);
+        }
+    }
+
+    public static void clearText(String fileName) {
+        if (!fileName.startsWith(Main.txtFilename)) {
+            fileName = Main.txtFilename + fileName;
+        }
+
+        ArrayList<String> clear = new ArrayList<>();
+        clear.add("");
+        writeToFile(clear, fileName);
+    }
+
+    public static void writeToFile(ArrayList<String> lines, String fileName) {
+        if (!fileName.startsWith(Main.txtFilename)) {
+            fileName = Main.txtFilename + fileName;
+        }
+
+        try {
+            PrintWriter outputStream = new PrintWriter(fileName);
+
+            for (String text : lines) {
+                outputStream.println(text);
+//                System.out.println("Added " + text + " to " + fileName);
+
+                outputStream.flush();
+            }
+
+            outputStream.close(); //this stops you from being able
+            // to write to the file later
+            //if you want to keep writing to the file
+            //use outputStream.flush(); instead
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static ArrayList<String> readFromFile(String fileName) {
+
+        if (!fileName.startsWith(Main.txtFilename)) {
+            fileName = Main.txtFilename + fileName;
+        }
+
+        Scanner scan;
+        try {
+            scan = new Scanner(new File(fileName));
+            ArrayList<String> words = new ArrayList<>();
+
+            while (scan.hasNext()) {
+                words.add(scan.next() + " ");
+            }
+            return words;
+
+        } catch (FileNotFoundException e) {
+            if (!fileName.equalsIgnoreCase("secretTalks")) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+    }
+
+    public static String readLine(String fileName, int line) {
+
+        if (!fileName.startsWith(Main.txtFilename)) {
+            fileName = Main.txtFilename + fileName;
+        }
+
+        Scanner scan;
+        try {
+            scan = new Scanner(new File(fileName));
+            ArrayList<String> lines = new ArrayList<>();
+
+            while (scan.hasNextLine()) {
+                lines.add(scan.nextLine());
+            }
+            if (line < lines.size()) {
+                return lines.get(line);
+            } else {
+                System.out.println("\n\n\nERROR AT TextFile LINE 107\n\n\n");
+            }
+
+        } catch (FileNotFoundException e) {
+            if (!fileName.equalsIgnoreCase("secretTalks")) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+    }
+
+    public static int numberOfLines(String fileName) {
+
+        if (!fileName.startsWith(Main.txtFilename)) {
+            fileName = Main.txtFilename + fileName;
+        }
+
+        Scanner scan;
+        try {
+            System.out.println(fileName);
+            scan = new Scanner(new File(fileName));
+            ArrayList<String> lines = new ArrayList<>();
+
+            while (scan.hasNextLine()) {
+                lines.add(scan.nextLine());
+            }
+            return lines.size();
+
+        } catch (FileNotFoundException e) {
+            if (!fileName.equalsIgnoreCase("secretTalks")) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+    public static void deleteLine(String fileName, int line) {
+        ArrayList<String> lines = allLines(fileName);
+        lines.remove(line);
+        saveLines(fileName, lines);
+    }
+
+    public static ArrayList<String> allLines(String fileName) {
+        if (!fileName.startsWith(Main.txtFilename)) {
+            fileName = Main.txtFilename + fileName;
+        }
+
+        Scanner scan;
+        try {
+            scan = new Scanner(new File(fileName));
+            ArrayList<String> lines = new ArrayList<>();
+
+            while (scan.hasNextLine()) {
+                lines.add(scan.nextLine());
+            }
+            return lines;
+
+        } catch (FileNotFoundException e) {
+            if (!fileName.equalsIgnoreCase("secretTalks")) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static void saveLines(String fileName, ArrayList<String> lines) {
+        if (!fileName.startsWith(Main.txtFilename)) {
+            fileName = Main.txtFilename + fileName;
+        }
+
+        try {
+            Scanner scan = new Scanner(new File(fileName));
+            writeToFile(lines, fileName);
+        } catch (FileNotFoundException e) {
+            System.out.println("No file found. Creating One");
+            ArrayList<String> start = new ArrayList<>();
+            writeToFile(start, fileName);
+        }
+    }
+
+    public static void addLine(String fileName, String line) {
+        ArrayList<String> lines = allLines(fileName);
+        lines.add(line);
+        saveLines(fileName, lines);
+    }
+
+    public static boolean fileExists(String fileName) {
+        try {
+            Scanner scan = new Scanner(new File(fileName));
+            return true;
+        } catch (FileNotFoundException e) {
+            return false;
+        }
+    }
+}
