@@ -3,8 +3,11 @@ package Note_App;
 import java.io.Serializable;
 
 public class Content implements Serializable{
+    //this class will be the parent class for both the directories and the blocks
     protected String path_of_parent, name;
     protected String color;
+
+    //basic getter and setter methods for te abstract class
     public String getPath_of_parent() {
         return path_of_parent;
     }

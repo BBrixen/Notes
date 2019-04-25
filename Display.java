@@ -149,6 +149,7 @@ public class Display extends Application {
     }
 
     public static void update(String command) {
+        //this whole thing changes the gui when the ures inputs a command, so that they can see their changes
         command = Main.removeSpacesAround(command.replace(System.getProperty("line.separator"), "").replace("\t", ""));
         if (command.startsWith("edit")) {
             output.setText(output.getText() + "\nCannot edit block, delete it an make a new one");
@@ -182,6 +183,7 @@ public class Display extends Application {
     }
 
     public static String removeChars(String returned_val) {
+        //removes chars that dont work in gui
         returned_val = returned_val.replace("\u001B[0m", "");
         returned_val = returned_val.replace("\u001B[34m", "");
         returned_val = returned_val.replace("\u001B[32m", "");
@@ -194,6 +196,7 @@ public class Display extends Application {
     }
 
     public static void save() {
+        //saves data in serialized object and txt file
         DataManager.saveData(Directory.main_dir, filename);
         TextFile.clearText(txtFilename);
         TextFile.addLine(txtFilename, removeChars(Directory.main_dir.printall("")));
@@ -261,6 +264,7 @@ public class Display extends Application {
 
 
     public static boolean startsWithIgnoreCase(String word, String seq) {
+        //fixes error for capitalization
         return word.toLowerCase().startsWith(seq.toLowerCase());
     }
 }
