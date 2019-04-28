@@ -28,6 +28,7 @@ public class Content implements Serializable{
     }
 
     public Content(String name) {
+        //default constructor for the child objects
         this.name = name;
         this.color = Main.current_color;
     }

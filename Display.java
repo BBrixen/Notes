@@ -64,7 +64,7 @@ public class Display extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        window = primaryStage;
+        window = primaryStage;//this is the main window
         window.setTitle("Notes");
         window.setOnCloseRequest(e -> {
             e.consume();
@@ -72,19 +72,20 @@ public class Display extends Application {
             Platform.exit();
         });
 
-        path = new Text(removeChars(Directory.current_dir.path + "/"));
+        path = new Text(removeChars(Directory.current_dir.path + "/")); //where the path is displayed for the user
         path.setFill(Color.WHITE);
         path_vbox = new VBox();
         path.setWrappingWidth(input_width-5);
         path_vbox.setPrefSize(input_width, 10);
         path_vbox.getChildren().addAll(path);
 
-        input = new TextArea();
+        input = new TextArea(); //user input
         input.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
         input.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
                 if (event.getCode().equals(KeyCode.ENTER)) {
+                    //this updates vairables to their ground states and runs handleInput()
                     commands.remove(commands.size()-1);
                     commands.add(input.getText());
                     commands.add("");
@@ -95,6 +96,7 @@ public class Display extends Application {
                     event.consume();
                     update(input.getText());
                 } else if (event.getCode().equals(KeyCode.TAB)) {
+                    //updates variables and runs autocomplete
                     System.out.println("Hit tab");
                     autoComplete_i++;
                     event.consume();
@@ -126,16 +128,19 @@ public class Display extends Application {
         output_vbox.setPrefSize(input_width, 1000);
         output_vbox.getChildren().addAll(output);
 
+        //this holds the path, input and output
         main_vbox = new VBox();
         main_vbox.setPrefSize(input_width, 1000);
         main_vbox.getChildren().addAll(path_vbox, input_vbox, output_vbox);
 
+        //this shows the notes that the user has taken
         print = new Text(removeChars(Directory.current_dir.print()));
         print.setFill(Color.WHITE);
         print_vbox = new VBox();
         print_vbox.setPrefSize(3000-input_width, 1000);
         print_vbox.getChildren().addAll(print);
 
+        //this is the overall main scene display, it is horizantally oriented
         main_layout = new HBox(20);
         main_layout.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
         main_layout.getChildren().addAll(main_vbox, print_vbox);
@@ -149,7 +154,8 @@ public class Display extends Application {
     }
 
     public static void update(String command) {
-        //this whole thing changes the gui when the ures inputs a command, so that they can see their changes
+        //this whole thing changes the gui when the ures inputs a command, so that they can see their changes.
+        //runs each time the user inputs new commands
         command = Main.removeSpacesAround(command.replace(System.getProperty("line.separator"), "").replace("\t", ""));
         if (command.startsWith("edit")) {
             output.setText(output.getText() + "\nCannot edit block, delete it an make a new one");
@@ -159,6 +165,7 @@ public class Display extends Application {
             save();
             Platform.exit();
         }
+        //basic commands
         if (command.startsWith("print all")) {
             isPrint = false;
         } else if (command.startsWith("print")) {
@@ -166,6 +173,7 @@ public class Display extends Application {
         }  else if (command.startsWith("clear")) {
             output.setText("");
         } else {
+            //more complex inputs
             String text = removeChars(handleInput(command));
             if (text.length() > 0) {
                 text = "\n" + text;

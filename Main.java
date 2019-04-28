@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 public class Main {
 
+    //main variables for the program
     public static String current_color;
     public static final String ANSI_RESET = "\u001B[0m", ANSI_RED = "\u001B[31m", ANSI_GREEN = "\u001B[32m", ANSI_YELLOW = "\u001B[33m",
             ANSI_BLUE = "\u001B[34m", ANSI_PURPLE = "\u001B[35m", ANSI_CYAN = "\u001B[36m", ANSI_UNDERLINE = "\u001B[4m";
@@ -16,20 +17,38 @@ public class Main {
 
         Directory.current_dir = Directory.main_dir;
 
+        //takes user input and handles it
         String input = "";
         while (!input.equalsIgnoreCase("TER PRGM")) {
             System.out.print(Directory.current_dir.getPath() + "/    ");
             input = (new Scanner(System.in)).nextLine();
             System.out.print(handleInput(input));
         }
+        //saves data when program is over
         Display.save();
     }
 
     public static String handleInput(String raw_input) {
+        //this takes all possible inputs and runs the needed method
+        //uses .startswith to find matches
         String returned_str = "";
         raw_input = removeSpacesAround(raw_input);
         String input = raw_input;
-        if (input.startsWith("+")) {
+
+        if (input.startsWith("help")) {
+            returned_str = "\ncd [name] : changes directory to [name]" +
+                    "\n\ncd.. : changes directory to parent" +
+                    "\n\nremdir [name] : removes [name] if it has no chilren" +
+                    "\n\nforce remdir [name] : removes [name]" +
+                    "\n\nmkdir [name] : makes a new directory named [name]" +
+                    "\n\nprint all : displays every dir and their children" +
+                    "\n\nprint : displays only the current directory's children" +
+                    "\n\nfind in all [name] : searches everything for [name]" +
+                    "\n\nfind [name] : searches the current directory for [name]" +
+                    "\n\ngo [path] : changes current directory to [path]" +
+                    "\n\ndel [number] : removes the text with id [number] from the current directory" +
+                    "\n\nclear : clears the output";
+        } else if (input.startsWith("+")) {
             Directory.current_dir.mkblock(removeSpacesAround(input.substring(1)));
             Display.save();
         } else {
@@ -149,6 +168,8 @@ public class Main {
     }
 
     public static String findColor(String input) {
+        //changes the color based on user input
+        //this is not used in the Display.java, this was only used in older versions of the app
         String color = current_color;
         if (input.equalsIgnoreCase("red")) {
             color = Main.ANSI_RED;
@@ -168,6 +189,7 @@ public class Main {
         return color;
     }
     public static void parsePath(String path) {
+        //this takes the user to the path that they input
         path = removeSlashesAround(path.toLowerCase());
         if (path.startsWith("notes")) {
             path = path.substring(5);
@@ -179,6 +201,7 @@ public class Main {
         }
     }
     public static void parse(String path, Directory dir) {
+        //changes the dir for a path, and it keeps the old path name to itar again
         path = removeSlashesAround(path);
         int length = path.split("/")[0].length();
         if (length == 0) {
@@ -212,6 +235,7 @@ public class Main {
     }
 
     public static String removeSpacesAround(String text) {
+        //removes spaces at the beginning and end of the message
         while (text.startsWith("_") || text.startsWith(" ")) {
             text = text.substring(1);
         }
@@ -221,6 +245,7 @@ public class Main {
         return text;
     }
     public static String removeSlashesAround(String text) {
+        //removes slashes at the beginning and end of the message
         while (text.startsWith("/")) {
             text = text.substring(1);
         }
