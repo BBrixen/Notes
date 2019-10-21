@@ -10,60 +10,47 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
 import java.util.ArrayList;
-
 import static Note_App.Main.ANSI_RESET;
 import static Note_App.Main.handleInput;
-
 public class Display extends Application {
 
     /**
-     * Allow Blocks to be edited
-     *      possibly make a pop up where the user can edit the current text
-     *
-     * Make command "go" only take the name of the wanted directory
-     *      if there is only 1 possible, go there
-     *      if there are more, then list off the paths with a number in front (this also makes a list of the possible paths for the most recent input)
-     *          then the user can type go [number] to go there. this means that go [text] has to check that the [text] is not a number before finding dir with name [text]
-     *
-     * Make the Print VBox consist of a bunch of buttons for each dir
-     *      so users can click it to enter the new directory
-     *
      * Text file parsing (save and load data from txt files, not serialized objects)
      *      make it so that edits to txt files update the data of the notes prgm
      *
+     * Make the display side a list of buttons and texts
+     *      a button is a dir and if you click on it, the dir opens
+     *      the texts are blocks and clicking on them will edit them
+     *      have a + button in all dirs to make a new dir or block
      */
 
     private static Stage window;
     private static Scene scene1;
     private static HBox main_layout;
     private static VBox main_vbox, path_vbox, input_vbox, output_vbox, print_vbox;
-    private static Text path, print, output;
-    private static TextArea input;
+    private static TextArea input, output, path, print;
     private static String current_color;
     private static boolean isPrint = true;
-    private int input_height = 10, input_width = 250;
+    private int input_height = 10, input_width = 260;
     private static final String filename = "data", txtFilename = "Notes.txt";
     private static int autoComplete_i = -1, commandComplete_i = -1;
     private static String typing = "";
     public static ArrayList<String> commands = new ArrayList<>();
 
     public static void main(String[] args) {
-        current_color = ANSI_RESET;
-        Main.current_color = current_color;
-
-//        Directory.main_dir = new Directory("Notes");
-        Directory.main_dir = (Directory) DataManager.loadData(filename);
-
-        Directory.current_dir = Directory.main_dir;
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
+
+        current_color = ANSI_RESET;
+        Main.current_color = current_color;
+        Directory.main_dir = (Directory) DataManager.loadData(filename);
+        Directory.current_dir = Directory.main_dir;
+
         window = primaryStage;//this is the main window
         window.setTitle("Notes");
         window.setOnCloseRequest(e -> {
@@ -72,14 +59,14 @@ public class Display extends Application {
             Platform.exit();
         });
 
-        path = new Text(removeChars(Directory.current_dir.path + "/")); //where the path is displayed for the user
-        path.setFill(Color.WHITE);
+        path = new TextArea(removeChars(Directory.current_dir.path + "/")); //where the path is displayed for the user
+        path.setEditable(false);
         path_vbox = new VBox();
-        path.setWrappingWidth(input_width-5);
         path_vbox.setPrefSize(input_width, 10);
         path_vbox.getChildren().addAll(path);
 
         input = new TextArea(); //user input
+        input.setMinWidth(input_width);
         input.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
         input.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
@@ -97,13 +84,13 @@ public class Display extends Application {
                     update(input.getText());
                 } else if (event.getCode().equals(KeyCode.TAB)) {
                     //updates variables and runs autocomplete
-                    System.out.println("Hit tab");
                     autoComplete_i++;
                     event.consume();
                     typing = autoComplete(typing);
                 } else if (event.getCode().equals(KeyCode.UP)) {
                     if (commandComplete_i == -1) {
                         commandComplete_i = commands.size();
+                        if(commands.size() > 1) commandComplete_i--;
                     }
                     commandComplete_i--;
                     input.setText(commands.get(commandComplete_i%commands.size()));
@@ -121,11 +108,11 @@ public class Display extends Application {
         input_vbox.getChildren().addAll(input);
 
         //output is the area that gives errors in code
-        output = new Text();
-        output.setFill(Color.WHITE);
-        output.setWrappingWidth(input_width-5);
+        output = new TextArea();
+        output.setPrefHeight(1000);
+        output.setEditable(false);
         output_vbox = new VBox();
-        output_vbox.setPrefSize(input_width, 1000);
+        output_vbox.setPrefWidth(input_width);
         output_vbox.getChildren().addAll(output);
 
         //this holds the path, input and output
@@ -134,8 +121,8 @@ public class Display extends Application {
         main_vbox.getChildren().addAll(path_vbox, input_vbox, output_vbox);
 
         //this shows the notes that the user has taken
-        print = new Text(removeChars(Directory.current_dir.print()));
-        print.setFill(Color.WHITE);
+        print = new TextArea(removeChars(Directory.current_dir.print()));
+        print.setEditable(false);
         print_vbox = new VBox();
         print_vbox.setPrefSize(3000-input_width, 1000);
         print_vbox.getChildren().addAll(print);
@@ -146,6 +133,7 @@ public class Display extends Application {
         main_layout.getChildren().addAll(main_vbox, print_vbox);
 
         scene1 = new Scene(main_layout, 600, 600, Color.DARKGRAY);
+        scene1.getStylesheets().add(getClass().getResource("layout.css").toExternalForm());
         window.setScene(scene1);
         window.setMaximized(true);
         window.show();
@@ -157,10 +145,6 @@ public class Display extends Application {
         //this whole thing changes the gui when the ures inputs a command, so that they can see their changes.
         //runs each time the user inputs new commands
         command = Main.removeSpacesAround(command.replace(System.getProperty("line.separator"), "").replace("\t", ""));
-        if (command.startsWith("edit")) {
-            output.setText(output.getText() + "\nCannot edit block, delete it an make a new one");
-            return;
-        }
         if (command.equalsIgnoreCase("ter prgm")) {
             save();
             Platform.exit();
@@ -220,7 +204,7 @@ public class Display extends Application {
         }
 
         String newTyping = completeChildren(words, typing); //sub algorithm 1, this searches through every child in the curent directory and returns a string of what the user is typing
-                                                    //it also replaces what the user is typing with the specific index of the list of the possible child directories
+        //it also replaces what the user is typing with the specific index of the list of the possible child directories
         if (newTyping!=null) return newTyping;
 
         if (Directory.current_dir.name.startsWith(typing)) {
@@ -234,17 +218,15 @@ public class Display extends Application {
 
     public static String completeChildren(String[] words, String typing) {
         ArrayList<String> all_names = allNames(typing); //finds all children directories of the current directory
-        System.out.println(all_names);
         if(all_names.size() == 0) {
             return null;
         }
-        int i = autoComplete_i % all_names.size(); //confirms that index i doesnt run @err Index OoB
-        words[words.length-1] = all_names.get(i); //grabs element i in list of possibilities
+        words[words.length-1] = all_names.get(autoComplete_i % all_names.size()).replace(" ", "_"); //grabs element i in list of possibilities
 
         String newText = reCreate(words, " "); //sub algorithm 2. This turns a list into a string, it is the reverse procedure of .splitBy(@param text);
 
         input.setText(newText.replace(System.getProperty("line.separator"), "").replace("\t", ""));
-            //replaces the text with the newText
+        //replaces the text with the newText
         return typing;
     }
 

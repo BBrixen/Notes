@@ -1,0 +1,62 @@
+.content {
+    -fx-background-color: transparent !important;
+}
+.viewport{
+    -fx-background-color: transparent !important;
+}
+.text-area {
+    -fx-text-fill: #1e88e5;
+    -fx-font-size: 12px;
+    -fx-background-color: transparent;
+}
+.scroll-pane .scroll-bar:horizontal {
+    -fx-pref-height: 5 ;
+    -fx-background-color: transparent;
+}
+.scroll-pane .scroll-bar:vertical {
+    -fx-pref-width: 5 ;
+    -fx-background-color: transparent;
+}
+.increment-button, .decrement-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track{
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0em;
+}
+
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+    -fx-background-color: white;
+    -fx-background-radius: 5em;
+}
+.button {
+    -fx-background-color: transparent;
+    -fx-border-color: #1e88e5;
+    -fx-background-radius: 0em;
+    -fx-text-fill: #1e88e5;
+    -fx-font-size: 12px;
+}
+.check-box {
+    -fx-text-fill: #1e88e5;
+    -fx-font-size: 12px;
+}
+.check-box .box {
+    -fx-background-color: transparent;
+    -fx-border-color:#1e88e5;
+    -fx-border-radius:3px;
+}
+
+.check-box:selected .mark {
+
+    -fx-background-color: #1e88e5;
+
+}
+
+.check-box:selected .box {
+
+    -fx-background-color: transparent;
+}

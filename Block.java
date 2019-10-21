@@ -1,7 +1,18 @@
 package Note_App;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
 import java.io.Serializable;
-import java.util.Scanner;
 
 public class Block extends Content implements Serializable {
 
@@ -16,6 +27,12 @@ public class Block extends Content implements Serializable {
     }
     public void setId(int id) {
         this.id = id;
+    }
+    public String getText() {
+        return text;
+    }
+    public void setText(String text) {
+        this.text = text;
     }
     @Override
     public String toString() {
@@ -36,8 +53,33 @@ public class Block extends Content implements Serializable {
     }
 
     public void editText() {
-        //to change the text of the block
-        System.out.println("Editing block with path "  + this.path_of_parent + "\nText: " + this.text);
-        this.text = (new Scanner(System.in)).nextLine();
+        Stage window = new Stage();
+        window.setTitle("Edit Text");
+        window.initModality(Modality.APPLICATION_MODAL);//makes all other windows not interactable until this window closes
+        window.setMinWidth(250);
+
+        VBox layout = new VBox(10);
+        layout.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        TextArea text = new TextArea(this.text);
+        text.setEditable(true);
+        text.setPrefWidth(500);
+        text.setPrefHeight(300);
+        text.setWrapText(true);
+
+        window.setOnCloseRequest(e -> {
+            this.setText(text.getText());
+            window.close();
+        });
+
+        layout.getChildren().addAll(text);
+        layout.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(layout, 1000, 500, Color.BLACK);
+        scene.getStylesheets().add(getClass().getResource("layout.css").toExternalForm());
+        window.setScene(scene);
+        window.setMaxHeight(500);
+        window.setMaxWidth(1000);
+        window.showAndWait();
     }
 }

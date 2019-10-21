@@ -8,6 +8,7 @@ public class Main {
     public static final String ANSI_RESET = "\u001B[0m", ANSI_RED = "\u001B[31m", ANSI_GREEN = "\u001B[32m", ANSI_YELLOW = "\u001B[33m",
             ANSI_BLUE = "\u001B[34m", ANSI_PURPLE = "\u001B[35m", ANSI_CYAN = "\u001B[36m", ANSI_UNDERLINE = "\u001B[4m";
     public static final String filename = "data", txtFilename = "Notes.txt";
+    public static ArrayList<String> stored_paths = new ArrayList<>();
 
     public static void main(String[] args) {
         current_color = ANSI_RESET;
@@ -190,42 +191,47 @@ public class Main {
     }
     public static void parsePath(String path) {
         //this takes the user to the path that they input
-        path = removeSlashesAround(path.toLowerCase());
-        if (path.startsWith("notes")) {
-            path = path.substring(5);
-            parse(path, Directory.main_dir);
-        } else {
-            int length = path.split("/")[0].length();
-            path = path.substring(length);
+        if (path.contains("/")) {
+            path = removeSlashesAround(path.toLowerCase());
+            if (path.startsWith("notes")) {
+                path = path.substring(5, path.length());
+                Directory.current_dir = Directory.main_dir;
+            } else if (path.startsWith(Directory.current_dir.name + "/")) {
+                path = path.substring(Directory.current_dir.name.length(), path.length());
+            }
             parse(path, Directory.current_dir);
+        } else {
+            int number = Integer.parseInt(path);
+            System.out.println(stored_paths);
+            if (number!=0) parsePath(stored_paths.get(number-1));
         }
     }
     public static void parse(String path, Directory dir) {
-        //changes the dir for a path, and it keeps the old path name to itar again
         path = removeSlashesAround(path);
-        int length = path.split("/")[0].length();
-        if (length == 0) {
-            Directory.current_dir = dir;
+        String name = path.split("/")[0];
+        if (name.equalsIgnoreCase("")) {
+            return;
         }
-        String name = path.substring(0, length);
-        path = removeSlashesAround(path.substring(length));
-
-        for (Content child : dir.getChildren()) {
+        for (Content child: dir.getChildren()) {
             if (child.name.equalsIgnoreCase(name)) {
-                parse(path, (Directory)child);
+                Directory.current_dir = (Directory) child;
+                parse(path.substring(Directory.current_dir.name.length(), path.length()), Directory.current_dir);
             }
         }
     }
     public static String find(String name, Directory dir) {
+        int counter = 1;
         String paths_list = "";
         //finds all directory paths with the same name, and combines them
-        ArrayList<String> paths = dir.search(name);
-        if (paths.size() > 0) {
-            for (String path : paths) {
+        stored_paths = dir.search(name);
+        if (stored_paths.size() > 0) {
+            for (String path : stored_paths) {
                 if (dir == Directory.main_dir) {
-                    paths_list += path + "\n";
+                    paths_list += counter + ". " + path + "\n";
+                    counter++;
                 } else {
-                    paths_list += path.replace(dir.getPath_of_parent(), "") + "\n";
+                    paths_list += counter + ". " + path.replace(dir.getPath_of_parent(), "") + "\n";
+                    counter++;
                 }
             }
             return paths_list;

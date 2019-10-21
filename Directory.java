@@ -1,4 +1,19 @@
 package Note_App;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.Window;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 public class Directory extends Content implements Serializable {
@@ -78,7 +93,7 @@ public class Directory extends Content implements Serializable {
         }
         if (children.size() > 0) {
             for (Content child : children) {
-                if (child.name.equalsIgnoreCase(newDirName)) {
+                if (equals(child.name, newDirName)) {
                     //finds the one matching the name and changes to it
                     current_dir = (Directory) child;
                     return "";
@@ -125,7 +140,7 @@ public class Directory extends Content implements Serializable {
         //this will try to delete the dir named @param dir, but will stop if it has children
         if (children.size() > 0) {
             for (Content child : children) {
-                if (child.name.equalsIgnoreCase(name)) {
+                if (equals(child.name, name)) {
                     if (((Directory) child).children.size() > 0) {
                         //does not romeve the child because it has children
                         return Main.ANSI_RED + "There are files in the directory" + Main.ANSI_RESET;
@@ -147,7 +162,7 @@ public class Directory extends Content implements Serializable {
         //this will delete the dir named @param name, and it will ignore if the dir has children
         if (children.size() > 0) {
             for (Content child : children) {
-                if (child.name.equalsIgnoreCase(name)) {
+                if (equals(child.name, name)) {
                     children.remove(child);
                     child = null; //this is needed, idk why its needed, but for some reason it is
                     return "";
@@ -165,13 +180,11 @@ public class Directory extends Content implements Serializable {
 
         for (Content child : this.getChildren()) { //searches through every child to find all childern with @param name
             if (!child.name.equalsIgnoreCase("")) {
-                if (child.name.equalsIgnoreCase(name)) {
+                if (equals(child.name, name)) {
                     paths.add(((Directory) child).getPath());
                     //add the path of the directory to the list of directories
-                } else {
-                    //searches all of the children dirs
-                    paths.addAll(((Directory) child).search(name));
                 }
+                paths.addAll(((Directory) child).search(name));
             }
         }
         return paths;
@@ -214,5 +227,100 @@ public class Directory extends Content implements Serializable {
             }
         }
         return message;
+    }
+
+    public VBox compileVBox(boolean first) {
+        //this is used to compile the VBox for print_all
+        VBox vBox = new VBox();
+        if (!first) vBox.setPadding(new Insets(0,0,0,25));
+
+        Button name_button = new Button(this.name);
+        name_button.setOnAction(e -> {
+            Directory.current_dir = this;
+            App.update("");
+        });
+        vBox.getChildren().addAll(name_button);
+
+        for (Content content : this.getChildren()) {
+            if (content.name.equalsIgnoreCase("")) {
+                TextArea textArea = new TextArea(((Block) content).getId() + ". " + ((Block) content).getText());
+                textArea.setEditable(false);
+                textArea.setMaxHeight(8);
+                vBox.getChildren().addAll(textArea);
+            } else {
+                vBox.getChildren().addAll(((Directory) content).compileVBox(false));
+            }
+        }
+        return vBox;
+    }
+
+    public void add() {
+        Stage window = new Stage();
+        window.setTitle("Edit Text");
+        window.initModality(Modality.APPLICATION_MODAL);//makes all other windows not interactable until this window closes
+        window.setMinWidth(250);
+
+        VBox layout = new VBox(10);
+        layout.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        TextArea text = new TextArea();
+        text.setEditable(true);
+        text.setPrefWidth(500);
+        text.setPrefHeight(200);
+        text.setWrapText(true);
+
+        CheckBox dir_checkbox = new CheckBox("Directory");
+
+        Button create = new Button("Create");
+        Button cancel = new Button("Cancel");
+        create.setOnAction(e -> {
+            windowClose(dir_checkbox, window, text);
+        });
+        cancel.setOnAction(e -> window.close());
+        HBox buttons = new HBox(10);
+        buttons.setAlignment(Pos.CENTER);
+        buttons.getChildren().addAll(create, cancel);
+
+        text.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.ENTER) && event.isShiftDown()) {
+                    windowClose(dir_checkbox, window, text);
+                }
+            }
+        });
+
+        window.setOnCloseRequest(e -> {
+            window.close();
+        });
+
+        layout.getChildren().addAll(text, dir_checkbox, buttons);
+        layout.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(layout, 500, 300, Color.BLACK);
+        scene.getStylesheets().add(getClass().getResource("layout.css").toExternalForm());
+        window.setScene(scene);
+        window.setMaxHeight(300);
+        window.setMaxWidth(500);
+        window.showAndWait();
+    }
+
+    public void windowClose(CheckBox dir_checkbox, Stage window, TextArea text) {
+        if (dir_checkbox.isSelected()) {
+            String inputText = text.getText().replace(System.getProperty("line.separator"), " ");
+            App.update("mkdir " + inputText);
+        } else {
+            App.update("+ " + text.getText());
+        }
+        window.close();
+    }
+
+    public boolean equals(String one, String two) {
+        return one.replace(" ", "_").equalsIgnoreCase(two.replace(" ", "_"));
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
